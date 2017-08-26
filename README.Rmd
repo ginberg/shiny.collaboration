@@ -1,0 +1,19 @@
+---
+title: "Readme"
+author: "Ger Inberg"
+date: "August 20, 2017"
+output: html_document
+---
+
+### Google Docs-like live collaboration in Shiny
+
+shiny.collections adds persistent reactive collections that can be effortlessly integrated with components like Shiny inputs, DT::dataTable or rhandsontable. The package makes it easy to build collaborative Shiny applications with persistent data.
+
+### Reactivity and rethinkdb
+
+Shiny is a framework that uses reactive programming. 
+
+The codes uses  the shiny collections library created by Appsilon 
+https://github.com/Appsilon/shiny.collections
+
+Before running an example make sure that your RethinkDB is set-up and running. For installation and running guidelines you can visit RethinkDB docs.
