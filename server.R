@@ -34,12 +34,36 @@ server = function(input, output) {
   # insert function.
   observe({
     if (!is.null(change_list()$val)) {
+      
       change_row <- as.list(data$collection[change_list()$row, ])
       change_col <- column_names[[change_list()$col]]
+      
+      # Neglect update if nothing changed
+      if(!all(is.na(change_row))) {
+        if(change_row[[change_col]] == change_list()$val){
+          print("No update needed")
+          return()
+        }
+      }
+      
+      # update value
       change_row[[change_col]] <- change_list()$val
+      
+      # set default values
+      if(is.na(change_row$description)){
+        change_row$a <- "Empty description"
+      }
+      if(is.na(change_row$name)){
+        change_row$b <- "Ger"
+      }
+      
+      # remove id field if empty, since the database should generate it
+      new_item <- change_row
+      if("id" %in% names(change_row) && is.na(change_row$id)){
+        new_item <- change_row[-4]
+      }
       shiny.collections::insert(data,
-                                change_row,
-                                conflict = "update")
+                                new_item)
     }
   })
   
@@ -47,5 +71,8 @@ server = function(input, output) {
     rhandsontable(data$collection[column_names], useTypes = TRUE) %>%
       hot_table(readOnly = FALSE)
   })
+  
+  outputOptions(output, "datatable", suspendWhenHidden = FALSE)
+  
   
 }
