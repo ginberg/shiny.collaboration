@@ -1,16 +1,18 @@
 server = function(input, output) {
-  
+
   # connect
   connection <- shiny.collections::connect()
   
   # We create collection object, where data$collection is reactive value.
-  data <- shiny.collections::collection("visitordata", connection)
+  visitordata <- shiny.collections::collection("visitordata", connection)
   column_names <- c("name", "description")
   
   isolate({
     # If we run the app for the first time, we should add some content
-    if(is_empty(data$collection)) {
-      shiny.collections::insert(data, list(name = "Ger", description = "Live collaboration with a rhandsontable! Add or delete rows by right clicking on this table."))
+    if(is_empty(visitordata$collection)) {
+      shiny.collections::insert(visitordata, list(name = "Ger", description = "Live collaboration with a rhandsontable!"))
+      shiny.collections::insert(visitordata, list(name = "Ger", description = "Add or delete rows by right clicking on this table."))
+      shiny.collections::insert(visitordata, list(name = "Ger", description = "Btw, do you like reactive programming?"))
     }
   })
   
@@ -35,7 +37,7 @@ server = function(input, output) {
   observe({
     if (!is.null(change_list()$val)) {
       
-      change_row <- as.list(data$collection[change_list()$row, ])
+      change_row <- as.list(visitordata$collection[change_list()$row, ])
       change_col <- column_names[[change_list()$col]]
       
       # Neglect update if nothing changed
@@ -50,11 +52,11 @@ server = function(input, output) {
       change_row[[change_col]] <- change_list()$val
       
       # set default values
-      if(is.na(change_row$description)){
-        change_row$a <- "Empty description"
-      }
       if(is.na(change_row$name)){
-        change_row$b <- "Ger"
+        change_row$name <- "Ger"
+      }
+      if(is.na(change_row$description)){
+        change_row$description <- "Empty description"
       }
       
       # remove id field if empty, since the database should generate it
@@ -62,17 +64,14 @@ server = function(input, output) {
       if("id" %in% names(change_row) && is.na(change_row$id)){
         new_item <- change_row[-4]
       }
-      shiny.collections::insert(data,
+      shiny.collections::insert(visitordata,
                                 new_item)
     }
   })
   
   output$datatable <- renderRHandsontable({
-    rhandsontable(data$collection[column_names], useTypes = TRUE) %>%
+    rhandsontable(visitordata$collection[column_names], useTypes = TRUE) %>%
       hot_table(readOnly = FALSE)
   })
-  
-  outputOptions(output, "datatable", suspendWhenHidden = FALSE)
-  
-  
+
 }
