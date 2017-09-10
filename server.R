@@ -7,12 +7,16 @@ server = function(input, output) {
   visitordata <- shiny.collections::collection("visitordata", connection)
   column_names <- c("name", "description")
   
+  getTimeInMillis <- function(){
+    return(as.character(as.numeric(Sys.time())*1000))
+  }
+  
   isolate({
     # If we run the app for the first time, we should add some content
     if(is_empty(visitordata$collection)) {
-      shiny.collections::insert(visitordata, list(name = "Ger", description = "Live collaboration with a rhandsontable!"))
-      shiny.collections::insert(visitordata, list(name = "Ger", description = "Add or delete rows by right clicking on this table."))
-      shiny.collections::insert(visitordata, list(name = "Ger", description = "Btw, do you like reactive programming?"))
+      shiny.collections::insert(visitordata, list(name = "Ger", description = "Live collaboration with a rhandsontable!", id = getTimeInMillis()))
+      shiny.collections::insert(visitordata, list(name = "Ger", description = "Add or delete rows by right clicking on this table.", id = getTimeInMillis()))
+      shiny.collections::insert(visitordata, list(name = "Ger", description = "Btw, do you like reactive programming?", id = getTimeInMillis()))
     }
   })
   
@@ -61,8 +65,8 @@ server = function(input, output) {
       
       # remove id field if empty, since the database should generate it
       new_item <- change_row
-      if("id" %in% names(change_row) && is.na(change_row$id)){
-        new_item <- change_row[-4]
+      if("id" %in% names(new_item) && is.na(new_item$id)){
+        new_item$id <- getTimeInMillis()
       }
       shiny.collections::insert(visitordata,
                                 new_item)
@@ -70,7 +74,7 @@ server = function(input, output) {
   })
   
   output$datatable <- renderRHandsontable({
-    rhandsontable(visitordata$collection[column_names], useTypes = TRUE) %>%
+    rhandsontable(visitordata$collection %>% arrange(id) %>% select(column_names), useTypes = TRUE) %>%
       hot_table(readOnly = FALSE)
   })
 
